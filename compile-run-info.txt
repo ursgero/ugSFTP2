@@ -1,0 +1,17 @@
+
+
+Lazarus Kompilieren:
+
+urs@mars2020:~/lazarus/ugSFTP2> fpc -g -Fu./ugSFTPunit -Fl./sftp-lib-cpp ugSFTP2.pas
+
+
+c++ Kompilieren
+
+urs@mars2020:~/lazarus/ugSFTP2/sftp-lib-cpp> make
+
+
+Lazarus testen:
+
+urs@mars2020:~/lazarus/ugSFTP2> sudo bash -c 'LD_LIBRARY_PATH=./sftp-lib-cpp:$LD_LIBRARY_PATH gdb ./ugSFTP2'
+
+danach mit  run im debugger starten

@@ -1,0 +1,10 @@
+*.res
+fp.*
+*.ico
+*.o
+*.lps
+*.lpi
+*.o
+backup/
+*.err
+*.out
