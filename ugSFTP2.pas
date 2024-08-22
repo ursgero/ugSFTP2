@@ -74,7 +74,7 @@ type
   end;
 
 
-  function ListRemoteFiles(SFTPClient: TugSFTP; const RemoteDir: string; FileList: TStringList): Boolean;
+  function ListRemoteFiles(SFTPClient: TugSFTP; const RemoteDir: string; FileListA,FileListB: TStringList): Boolean;
   var
     RemoteFileInfos: TStringList;
     Temp: TStringList;
@@ -109,7 +109,8 @@ type
           FileName := Temp.Values['Name'];
           UnixTime := StrToInt64(Temp.Values['mdate']);
           // Fügen Sie die Information zur FileList hinzu
-          FileList.Add(FileName + '=' + IntToStr(UnixTime));
+          FileListA.Add(FileName + '=' + IntToStr(UnixTime));
+          FileListB.Add(FileName + '=' + Temp.Values['Groesse']);
         finally
           Temp.Free;
         end;
@@ -122,35 +123,46 @@ type
   end;
 
 
-
-  procedure ListLocalFiles(const Dir: string; FileList: TStringList);
+  procedure ListLocalFiles(const Dir: string; FileListA, FileListB: TStringList);
   var
     SR: TSearchRec;
     UnixTime: Int64;
     DateTime: TDateTime;
+    FileSize: Int64;
   begin
     if FindFirst(Dir + '*.*', faAnyFile, SR) = 0 then
     begin
       repeat
         if (SR.Attr and faDirectory) = 0 then
         begin
+          // Berechnung von Datum und Zeit in Unix-Zeitstempel
           DateTime := FileDateToDateTime(SR.Time);
           UnixTime := DateTimeToUnix(DateTime);
+          // Ausgabe zur Überprüfung
           WriteLn('Local file: ', SR.Name, ' DateTime: ', DateTimeToStr(DateTime), ' UnixTime: ', UnixTime);
-          FileList.Add(SR.Name + '=' + IntToStr(UnixTime));
+
+          // Hinzufügen des Namens und des Alters zur FileListA
+          FileListA.Add(SR.Name + '=' + IntToStr(UnixTime));
+
+          // Berechnung der Dateigröße
+          FileSize := SR.Size;
+          // Hinzufügen des Namens und der Größe zur FileListB
+          FileListB.Add(SR.Name + '=' + IntToStr(FileSize));
         end;
       until FindNext(SR) <> 0;
       FindClose(SR);
     end;
   end;
 
+
   procedure SyncFiles(const Config: TConfig);
   var
     SFTPClient: TugSFTP;
-    LocalFiles, RemoteFiles: TStringList;
+    LocalFilesA, LocalFilesB, RemoteFilesA, RemoteFilesB: TStringList;
     LocalFileName: string;
     i: Integer;
     LocalMTime, RemoteMTime: TDateTime;
+    LocalSize, RemoteSize: Int64;
   begin
     // Erstellen und Initialisieren des SFTP-Clients
     SFTPClient := TugSFTP.Create(PChar(Config.Server), 22, PChar(Config.User), PChar(Config.Password));
@@ -160,36 +172,41 @@ type
         WriteLn('Connected to SFTP server.');
 
         // Initialisieren der TStringList-Instanzen
-        LocalFiles := TStringList.Create;
-        RemoteFiles := TStringList.Create;
+        LocalFilesA := TStringList.Create;  // Liste für lokale Datei-Alter
+        LocalFilesB := TStringList.Create;  // Liste für lokale Datei-Größen
+        RemoteFilesA := TStringList.Create; // Liste für entfernte Datei-Alter
+        RemoteFilesB := TStringList.Create; // Liste für entfernte Datei-Größen
         try
           // Lokale Dateien auflisten
-          ListLocalFiles(Config.LocDir, LocalFiles);
+          ListLocalFiles(Config.LocDir, LocalFilesA, LocalFilesB);
 
           // Remote-Dateien auflisten
-          if not ListRemoteFiles(SFTPClient, Config.RemDir, RemoteFiles) then
+          if not ListRemoteFiles(SFTPClient, Config.RemDir, RemoteFilesA, RemoteFilesB) then
           begin
             WriteLn('Failed to list remote files.');
             Exit;
           end;
 
-          // Vergleichen der Dateien und Hochladen der neueren Dateien
-          for i := 0 to LocalFiles.Count - 1 do
+          // Vergleichen der Dateien und Hochladen der neueren oder größeren Dateien
+          for i := 0 to LocalFilesA.Count - 1 do
           begin
-            LocalFileName := LocalFiles.Names[i];
-            LocalMTime := UnixTimeToDateTime(StrToInt64(LocalFiles.ValueFromIndex[i])); // Konvertierung der Unix-Zeit in TDateTime
+            LocalFileName := LocalFilesA.Names[i];
+            LocalMTime := UnixTimeToDateTime(StrToInt64(LocalFilesA.Values[LocalFileName]));
+            LocalSize := StrToInt64(LocalFilesB.Values[LocalFileName]);
 
-            if RemoteFiles.IndexOfName(LocalFileName) <> -1 then
+            if RemoteFilesA.IndexOfName(LocalFileName) <> -1 then
             begin
-              RemoteMTime := UnixTimeToDateTime(StrToInt64(RemoteFiles.Values[LocalFileName]));
-              WriteLn('Comparing: ', LocalFileName);
-              WriteLn('Local modification time: ', DateTimeToStr(LocalMTime));
-              WriteLn('Remote modification time: ', DateTimeToStr(RemoteMTime));
+              RemoteMTime := UnixTimeToDateTime(StrToInt64(RemoteFilesA.Values[LocalFileName]));
+              RemoteSize := StrToInt64(RemoteFilesB.Values[LocalFileName]);
 
-              if LocalMTime > RemoteMTime then
+              WriteLn('Comparing: ', LocalFileName);
+              WriteLn('Local modification time: ', DateTimeToStr(LocalMTime), ' Remote modification time: ', DateTimeToStr(RemoteMTime));
+              WriteLn('Local size: ', LocalSize, ' Remote size: ', RemoteSize);
+
+              if (LocalMTime > RemoteMTime) or (LocalSize > RemoteSize) then
               begin
                 WriteLn('Uploading ', LocalFileName);
-                SFTPClient.UploadFile(PChar(Config.LocDir + LocalFileName), PChar(Config.RemDir + LocalFileName));
+                SFTPClient.UploadFile(PChar(Config.LocDir + '/' + LocalFileName), PChar(Config.RemDir + '/' + LocalFileName));
               end
               else
                 WriteLn('Skipping ', LocalFileName);
@@ -197,13 +214,15 @@ type
             else
             begin
               WriteLn('Uploading ', LocalFileName, ' (new file)');
-              SFTPClient.UploadFile(PChar(Config.LocDir + LocalFileName), PChar(Config.RemDir + LocalFileName));
+              SFTPClient.UploadFile(PChar(Config.LocDir + '/' + LocalFileName), PChar(Config.RemDir + '/' + LocalFileName));
             end;
           end;
 
         finally
-          LocalFiles.Free;
-          RemoteFiles.Free;
+          LocalFilesA.Free;
+          LocalFilesB.Free;
+          RemoteFilesA.Free;
+          RemoteFilesB.Free;
         end;
 
       end
@@ -213,7 +232,6 @@ type
       SFTPClient.Free;
     end;
   end;
-
 
 var
   Config: TConfig;
