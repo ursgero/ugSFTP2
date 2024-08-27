@@ -51,7 +51,7 @@ password=secret
 
 ## Benutzung
 
-./ugSFTP2 --server example.com --user myuser --password mypass --locdir /local/dir --remdir /remote/dir
+./ugSFTP2 --server example.com --user <user> --password <password> --locdir /local/dir --remdir /remote/dir
 ./ugSFTP2 -c /path/to/config.txt
 
 Für mehrsprachige Hilfe:
