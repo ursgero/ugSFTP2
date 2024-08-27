@@ -35,7 +35,7 @@ begin
         WriteLn('  and ease of use in automated scripts.');
         WriteLn;
         WriteLn('Examples:');
-        WriteLn('  ugSFTP2 --server example.com --user myuser --password mypass --locdir /local/dir --remdir /remote/dir');
+        WriteLn('  ugSFTP2 --server example.com --user <user> --password <password> --locdir /local/dir --remdir /remote/dir');
         WriteLn('  ugSFTP2 -c /path/to/config.txt');
         WriteLn('  For more information on configuration file format, refer to the user manual.');
         WriteLn;
@@ -68,7 +68,7 @@ begin
           WriteLn('  oder eine Konfigurationsdatei angeben, was Flexibilität und Benutzerfreundlichkeit in automatisierten Skripten bietet.');
           WriteLn;
           WriteLn('Beispiele:');
-          WriteLn('  ugSFTP2 --server example.com --user myuser --password mypass --locdir /local/dir --remdir /remote/dir');
+          WriteLn('  ugSFTP2 --server example.com --user <user> --password <password> --locdir /local/dir --remdir /remote/dir');
           WriteLn('  ugSFTP2 -c /pfad/zur/config.txt');
           WriteLn('  Für weitere Informationen zum Format der Konfigurationsdatei, siehe Benutzerhandbuch.');
           WriteLn;
@@ -101,7 +101,7 @@ begin
           WriteLn('  ou un fichier de configuration, ce qui offre flexibilité et facilité d''utilisation dans les scripts automatisés.');
           WriteLn;
           WriteLn('Exemples :');
-          WriteLn('  ugSFTP2 --server example.com --user myuser --password mypass --locdir /local/dir --remdir /remote/dir');
+          WriteLn('  ugSFTP2 --server example.com --user <user> --password <password> --locdir /local/dir --remdir /remote/dir');
           WriteLn('  ugSFTP2 -c /chemin/vers/config.txt');
           WriteLn('  Pour plus d''informations sur le format du fichier de configuration, consultez le manuel utilisateur.');
           WriteLn;
@@ -135,7 +135,7 @@ begin
       WriteLn('  e facilità d''uso in script automatizzati.');
       WriteLn;
       WriteLn('Esempi:');
-      WriteLn('  ugSFTP2 --server example.com --user myuser --password mypass --locdir /dir/locale --remdir /dir/remota');
+      WriteLn('  ugSFTP2 --server example.com --user <user> --password <password> --locdir /dir/locale --remdir /dir/remota');
       WriteLn('  ugSFTP2 -c /percorso/al/config.txt');
       WriteLn('  Per maggiori informazioni sul formato del file di configurazione, consultare il manuale utente.');
       WriteLn;
@@ -170,7 +170,7 @@ begin
       WriteLn('  y facilidad de uso en scripts automatizados.');
       WriteLn;
       WriteLn('Ejemplos:');
-      WriteLn('  ugSFTP2 --server example.com --user miusuario --password mipass --locdir /dir/local --remdir /dir/remota');
+      WriteLn('  ugSFTP2 --server example.com --user <user> --password <password> --locdir /dir/local --remdir /dir/remota');
       WriteLn('  ugSFTP2 -c /ruta/al/archivo/config.txt');
       WriteLn('  Para más información sobre el formato del archivo de configuración, consulta el manual del usuario.');
       WriteLn;
@@ -204,7 +204,7 @@ begin
       WriteLn('  e facilidade de uso em scripts automatizados.');
       WriteLn;
       WriteLn('Exemplos:');
-      WriteLn('  ugSFTP2 --server example.com --user meuusuario --password minhasenha --locdir /dir/local --remdir /dir/remoto');
+      WriteLn('  ugSFTP2 --server example.com --user <user> --password <password> --locdir /dir/local --remdir /dir/remoto');
       WriteLn('  ugSFTP2 -c /caminho/para/config.txt');
       WriteLn('  Para mais informações sobre o formato do arquivo de configuração, consulte o manual do usuário.');
       WriteLn;
@@ -238,7 +238,7 @@ begin
       WriteLn('  und eifachi Verwändig in automatisierte Skripte ermöglicht.');
       WriteLn;
       WriteLn('Bischpel:');
-      WriteLn('  ugSFTP2 --server example.com --user myuser --password mypass --locdir /local/dir --remdir /remote/dir');
+      WriteLn('  ugSFTP2 --server example.com --user <user> --password <password> --locdir /local/dir --remdir /remote/dir');
       WriteLn('  ugSFTP2 -c /pfad/zum/konfig.txt');
       WriteLn('  Für meh Informatione zum Format vom Konfigurationsfile, lueg s''Benutzerhandbuech aa.');
       WriteLn;
@@ -272,7 +272,7 @@ begin
       WriteLn('  ed utilisaziun simpla en scripts automatizads.');
       WriteLn;
       WriteLn('Exempels:');
-      WriteLn('  ugSFTP2 --server example.com --user miuutilisader --password miapledclav --locdir /dir/locala --remdir /dir/remota');
+      WriteLn('  ugSFTP2 --server example.com --user <user> --password <password> --locdir /dir/locala --remdir /dir/remota');
       WriteLn('  ugSFTP2 -c /via/als/datotecas/config.txt');
       WriteLn('  Per dapli infurmaziuns davart il format dal datoteca da configuraziun, consultai il manual d''utilisader.');
       WriteLn;
