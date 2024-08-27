@@ -8,3 +8,4 @@ fp.*
 backup/
 *.err
 *.out
+*.ppu

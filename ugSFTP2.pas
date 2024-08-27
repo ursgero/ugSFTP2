@@ -3,17 +3,19 @@ program ugSFTP2;
 {$mode objfpc}{$H+}
 
 uses
-  SysUtils, Classes, ugSFTPunit, DateUtils;
+  SysUtils, Classes, ugSFTPunit, HelpTexts, DateUtils;
 
-type
-  TConfig = record
-    LocDir: string;
-    RemDir: string;
-    Server: string;
-    User: string;
-    Password: string;
-  end;
+  type
+    TConfig = record
+      LocDir: string;
+      RemDir: string;
+      Server: string;
+      User: string;
+      Password: string;
+      ConfigFile: string;
+    end;
 
+{
   function LoadConfig(const FileName: string): TConfig;
   var
     ConfigFile: TextFile;
@@ -56,6 +58,8 @@ type
     end;
     Result := Config;
   end;
+
+  }
 
   function DateTimeToUnix(DateTime: TDateTime): Int64;
   const
@@ -233,9 +237,136 @@ type
     end;
   end;
 
+  function LoadConfig(const FileName: string): TConfig;
+  var
+    ConfigFile: TextFile;
+    Line, Key, Value: string;
+  begin
+    AssignFile(ConfigFile, FileName);
+    try
+      Reset(ConfigFile);
+      while not EOF(ConfigFile) do
+      begin
+        ReadLn(ConfigFile, Line);
+        if Pos('=', Line) > 0 then
+        begin
+          Key := Trim(Copy(Line, 1, Pos('=', Line) - 1));
+          Value := Trim(Copy(Line, Pos('=', Line) + 1, Length(Line)));
+          if Key = 'locdir' then
+            Result.LocDir := Value
+          else if Key = 'remdir' then
+            Result.RemDir := Value
+          else if Key = 'server' then
+            Result.Server := Value
+          else if Key = 'user' then
+            Result.User := Value
+          else if Key = 'password' then
+            Result.Password := Value;
+        end;
+      end;
+    finally
+      CloseFile(ConfigFile);
+    end;
+  end;
+
+  procedure ParseCommandLine(var Config: TConfig);
+  var
+    i: Integer;
+  begin
+    i := 1;
+    while i <= ParamCount do
+    begin
+      if (ParamStr(i) = '--server') or (ParamStr(i) = '-s') then
+      begin
+        Inc(i);
+        if i <= ParamCount then
+          Config.Server := ParamStr(i);
+      end
+      else if (ParamStr(i) = '--user') or (ParamStr(i) = '-u') then
+      begin
+        Inc(i);
+        if i <= ParamCount then
+          Config.User := ParamStr(i);
+      end
+      else if (ParamStr(i) = '--password')  or (ParamStr(i) = '-p') then
+      begin
+        Inc(i);
+        if i <= ParamCount then
+          Config.Password := ParamStr(i);
+      end
+      else if (ParamStr(i) = '--locdir')  or (ParamStr(i) = '-l') then
+      begin
+        Inc(i);
+        if i <= ParamCount then
+          Config.LocDir := ParamStr(i);
+      end
+      else if (ParamStr(i) = '--remdir')  or (ParamStr(i) = '-r') then
+      begin
+        Inc(i);
+        if i <= ParamCount then
+          Config.RemDir := ParamStr(i);
+      end
+      else if (ParamStr(i) = '--configfile') or (ParamStr(i) = '-c') then
+      begin
+        Inc(i);
+        if i <= ParamCount then
+          Config.ConfigFile := ParamStr(i);
+      end
+      else begin
+        if (ParamStr(i) = '-h') or (ParamStr(i) = '--help') then
+           ShowHelp('en')
+        else
+        if (ParamStr(i) = '--help-en') or (ParamStr(i) = '-h-en') then
+          ShowHelp('en')
+        else
+        if (ParamStr(i) = '--help-de') or (ParamStr(i) = '-h-de') then
+          ShowHelp('de')
+        else
+        if (ParamStr(i) = '--help-fr') or (ParamStr(i) = '-h-fr') then
+          ShowHelp('fr')
+        else
+        if (ParamStr(i) = '--help-it') or (ParamStr(i) = '-h-it') then
+         ShowHelp('it')
+        else
+        if (ParamStr(i) = '--help-es') or (ParamStr(i) = '-h-es') then
+          ShowHelp('es')
+        else
+        if (ParamStr(i) = '--help-pt') or (ParamStr(i) = '-h-pt') then
+            ShowHelp('pt')
+        else
+        if (ParamStr(i) = '--help-ch') or (ParamStr(i) = '-h-ch') then
+          ShowHelp('ch')
+        else
+        if (ParamStr(i) = '--help-rt') or (ParamStr(i) = '-h-rt') then
+            ShowHelp('rt');
+        Halt(0);  // Exit program after showing help
+      end;
+      Inc(i);
+//      end;
+    end;
+  end;
+
 var
   Config: TConfig;
+
 begin
-  Config := LoadConfig('/etc/ugftp/control.txt');
+
+// Set default values for the config
+  Config.Server := 'localhost';
+  Config.User := 'user';
+  Config.Password := 'password';
+  Config.LocDir := '/';
+  Config.RemDir := '/';
+  Config.ConfigFile := '/etc/ugftp/control.txt'; // Default configuration file
+  // Parse command line arguments first
+
+  ParseCommandLine(Config);
+
+  // Load configuration from specified file
+
+  Config := LoadConfig(Config.ConfigFile);
+
+//  Config := LoadConfig('/etc/ugftp/control.txt');
+
   SyncFiles(Config);
 end.
